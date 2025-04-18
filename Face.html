@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Face Animation Following Mouse</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f8ff;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            perspective: 1000px;
+        }
+
+        .scene {
+            width: 300px;
+            height: 300px;
+            perspective: 800px;
+            position: relative;
+        }
+
+        .container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            transform-style: preserve-3d;
+            transition: transform 0.05s ease-out;
+        }
+
+        .face {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background-color: #ffe0bd;
+            border-radius: 50%;
+            border: 5px solid #333;
+            top: 25px;
+            left: 25px;
+            transform-style: preserve-3d;
+        }
+
+        .eyes-container {
+            position: relative;
+            top: 80px;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            transform-style: preserve-3d;
+            transform: translateZ(10px);
+        }
+
+        .eye {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-radius: 50%;
+            border: 3px solid #333;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .pupil {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #333;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+        }
+
+        .mouth {
+            position: absolute;
+            width: 100px;
+            height: 30px;
+            background-color: #ff9999;
+            border-radius: 0 0 50px 50px;
+            bottom: 60px;
+            left: 75px;
+            border: 3px solid #333;
+            border-top: none;
+            transform-style: preserve-3d;
+            transform: translateZ(5px);
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            width: 100%;
+            color: #333;
+        }
+
+        .hair {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 250px;
+            height: 80px;
+            background-color: #8B4513;
+            border-radius: 50% 50% 0 0;
+            border: 5px solid #333;
+            border-bottom: none;
+            transform-style: preserve-3d;
+            transform: translateZ(15px);
+        }
+
+        .ear {
+            position: absolute;
+            width: 30px;
+            height: 50px;
+            background-color: #ffe0bd;
+            border: 3px solid #333;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+        }
+
+        .ear-left {
+            left: -10px;
+            top: 100px;
+            transform: translateZ(-5px);
+        }
+
+        .ear-right {
+            right: -10px;
+            top: 100px;
+            transform: translateZ(-5px);
+        }
+
+        .blush {
+            position: absolute;
+            width: 35px;
+            height: 20px;
+            background-color: #ff9999;
+            border-radius: 50%;
+            opacity: 0.5;
+            transform-style: preserve-3d;
+            transform: translateZ(8px);
+        }
+
+        .blush-left {
+            left: 40px;
+            top: 130px;
+        }
+
+        .blush-right {
+            right: 40px;
+            top: 130px;
+        }
+
+        .nose {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: #ffb0a0;
+            border-radius: 50%;
+            top: 125px;
+            left: 112.5px;
+            border: 2px solid #333;
+            transform-style: preserve-3d;
+            transform: translateZ(20px);
+        }
+
+        .eyebrow {
+            position: absolute;
+            width: 50px;
+            height: 10px;
+            background-color: #6d4c41;
+            border-radius: 5px;
+            transform-style: preserve-3d;
+            transform: translateZ(12px);
+        }
+
+        .eyebrow-left {
+            top: 65px;
+            left: 50px;
+            transform: translateZ(12px) rotate(-5deg);
+        }
+
+        .eyebrow-right {
+            top: 65px;
+            right: 50px;
+            transform: translateZ(12px) rotate(5deg);
+        }
+
+        .shadow {
+            position: absolute;
+            width: 250px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            bottom: -20px;
+            left: 25px;
+            filter: blur(10px);
+            transform: rotateX(90deg) translateZ(-140px);
+        }
+    </style>
+</head>
+<body>
+    <div class="scene">
+        <div class="container" id="container">
+            <div class="face">
+                <div class="hair"></div>
+                <div class="ear ear-left"></div>
+                <div class="ear ear-right"></div>
+                <div class="eyebrow eyebrow-left"></div>
+                <div class="eyebrow eyebrow-right"></div>
+                <div class="eyes-container">
+                    <div class="eye" id="left-eye">
+                        <div class="pupil" id="left-pupil"></div>
+                    </div>
+                    <div class="eye" id="right-eye">
+                        <div class="pupil" id="right-pupil"></div>
+                    </div>
+                </div>
+                <div class="nose"></div>
+                <div class="blush blush-left"></div>
+                <div class="blush blush-right"></div>
+                <div class="mouth" id="mouth"></div>
+            </div>
+            <div class="shadow"></div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <p>Move your mouse around to see the 3D face animation!</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const leftPupil = document.getElementById('left-pupil');
+            const rightPupil = document.getElementById('right-pupil');
+            const leftEye = document.getElementById('left-eye');
+            const rightEye = document.getElementById('right-eye');
+            const container = document.getElementById('container');
+            const mouth = document.getElementById('mouth');
+            
+            // Get the position of both eyes for calculations
+            let leftEyeRect = leftEye.getBoundingClientRect();
+            let rightEyeRect = rightEye.getBoundingClientRect();
+            
+            let leftEyeCenterX = leftEyeRect.left + leftEyeRect.width / 2;
+            let leftEyeCenterY = leftEyeRect.top + leftEyeRect.height / 2;
+            
+            let rightEyeCenterX = rightEyeRect.left + rightEyeRect.width / 2;
+            let rightEyeCenterY = rightEyeRect.top + rightEyeRect.height / 2;
+            
+            // Maximum movement of pupil from center (in pixels)
+            const maxMovement = 15;
+            // Maximum 3D rotation (in degrees)
+            const maxRotation = 10;
+            
+            // Get container center for 3D rotation calculations
+            let containerRect = container.getBoundingClientRect();
+            let containerCenterX = containerRect.left + containerRect.width / 2;
+            let containerCenterY = containerRect.top + containerRect.height / 2;
+            
+            document.addEventListener('mousemove', function(e) {
+                // Calculate normalized mouse position relative to center (-1 to 1)
+                let mouseXRatio = (e.clientX - containerCenterX) / (window.innerWidth / 2);
+                let mouseYRatio = (e.clientY - containerCenterY) / (window.innerHeight / 2);
+                
+                // Limit ratios to -1 to 1 range
+                mouseXRatio = Math.max(-1, Math.min(1, mouseXRatio));
+                mouseYRatio = Math.max(-1, Math.min(1, mouseYRatio));
+                
+                // 3D rotation effect
+                let rotateY = maxRotation * mouseXRatio;
+                let rotateX = -maxRotation * mouseYRatio;
+                
+                // Apply 3D rotation to container
+                container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                
+                // Mouth curve adjustment based on vertical mouse position
+                let mouthCurve = 50 + 20 * mouseYRatio;
+                mouth.style.borderRadius = `0 0 ${mouthCurve}px ${mouthCurve}px`;
+                
+                // Calculate eye movements
+                let leftAngle = Math.atan2(e.clientY - leftEyeCenterY, e.clientX - leftEyeCenterX);
+                let rightAngle = Math.atan2(e.clientY - rightEyeCenterY, e.clientX - rightEyeCenterX);
+                
+                let leftX = Math.cos(leftAngle) * maxMovement;
+                let leftY = Math.sin(leftAngle) * maxMovement;
+                
+                let rightX = Math.cos(rightAngle) * maxMovement;
+                let rightY = Math.sin(rightAngle) * maxMovement;
+                
+                // Apply translation to pupils
+                leftPupil.style.transform = `translate(calc(-50% + ${leftX}px), calc(-50% + ${leftY}px))`;
+                rightPupil.style.transform = `translate(calc(-50% + ${rightX}px), calc(-50% + ${rightY}px))`;
+            });
+            
+            // Reset on mouse leave
+            document.addEventListener('mouseleave', function() {
+                leftPupil.style.transform = 'translate(-50%, -50%)';
+                rightPupil.style.transform = 'translate(-50%, -50%)';
+                container.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                mouth.style.borderRadius = '0 0 50px 50px';
+            });
+            
+            // Update positions on resize
+            window.addEventListener('resize', function() {
+                leftEyeRect = leftEye.getBoundingClientRect();
+                rightEyeRect = rightEye.getBoundingClientRect();
+                
+                leftEyeCenterX = leftEyeRect.left + leftEyeRect.width / 2;
+                leftEyeCenterY = leftEyeRect.top + leftEyeRect.height / 2;
+                
+                rightEyeCenterX = rightEyeRect.left + rightEyeRect.width / 2;
+                rightEyeCenterY = rightEyeRect.top + rightEyeRect.height / 2;
+                
+                containerRect = container.getBoundingClientRect();
+                containerCenterX = containerRect.left + containerRect.width / 2;
+                containerCenterY = containerRect.top + containerRect.height / 2;
+            });
+        });
+    </script>
+</body>
+</html>
